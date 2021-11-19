@@ -1,0 +1,24 @@
+{
+  "name": "telegram-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "lint:fix": "eslint . --fix",
+    "lint": "eslint ."
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "bunyan": "^1.8.15",
+    "ngrok": "^4.2.2",
+    "node-telegram-bot-api": "^0.54.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.2.0"
+  }
+}

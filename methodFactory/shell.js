@@ -1,15 +1,27 @@
+const OAuth = require('./oauth')
 const {
 	execute,
 	executeSpawn,
 	getCustomCommand,
+	existDeniedCommands
 } = require('../utils/executeShell')
+const {
+	config: { adminUsers }
+} = require('../config')
 
-class Shell {
-	constructor({command, botServer, chatId, log}) {
+class Shell extends OAuth {
+	constructor(args) {
+		super(args)
+		const { command }= args
 		this.command = command
-		this.botServer = botServer
-		this.chatId = chatId
-		this.log = log
+	}
+
+	isValidShellCommand () {
+		if (existDeniedCommands(this.command)) {
+			this.botServer.sendMessage(this.chatId, 'You are not allowed to perform this command!')
+			return false
+		}
+		return true
 	}
 
 	executeMethod() {
@@ -25,6 +37,26 @@ class Shell {
 			if(error) this.botServer.sendMessage(this.chatId, 'Failed to execute your command')
 			else this.botServer.sendMessage(this.chatId, `<code>${stdout}${stderr}</code>`, { parse_mode: 'HTML' })
 		})
+	}
+
+	// Override
+	validateOAuth(msg, match) {
+		if (!adminUsers.includes(this.chatId)) {
+			this.botServer.sendMessage(this.chatId, 'You are not allowed to use this bot!')
+			this.log.warn({ ...msg , ...match }, 'Blocked by oauth policies')
+			return false
+		}
+		if (!this.isValidShellCommand()) {
+			this.log.warn({ ...msg , ...match }, 'Blocked by command policies')
+			return false
+		}
+
+		this.log.info({
+			name: msg.from.first_name,
+			userName: msg.from.username,
+			message: msg.text
+		}, 'Message received')
+		return this
 	}
 }
 

@@ -1,23 +1,18 @@
 const fs = require('fs')
 const axios = require('axios')
+const OAuth = require('./oauth')
 
-class Iot {
-	constructor({
-		command,
-		botServer,
-		chatId,
-		botConfigs: {
-			config: {
-				iot 
+class Iot extends OAuth {
+	constructor(args) {
+		const {
+			command,
+			botConfigs: {
+				config: { iot }
 			}
-		},
-		log
-	}) {
+		} = args
+		super(args)
 		this.command = command
-		this.botServer = botServer
-		this.chatId = chatId
 		this.iot = iot
-		this.log = log
 	}
 
 	async executeMethod() {

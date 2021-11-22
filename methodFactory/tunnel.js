@@ -1,20 +1,17 @@
 const ngrok = require('ngrok')
+const OAuth = require('./oauth')
 
-class Tunnel {
-	constructor({
-		command,
-		botServer,
-		chatId,
-		botConfigs: {
-			ngrokToken
-		},
-		log
-	}) {
+class Tunnel extends OAuth {
+	constructor(args) {
+		super(args)
+		const {
+			command,
+			botConfigs: {
+				ngrokToken
+			}
+		} = args
 		this.command = command
-		this.botServer = botServer
-		this.chatId = chatId
 		this.ngrokToken = ngrokToken
-		this.log = log
 	}
 
 	async executeMethod() {

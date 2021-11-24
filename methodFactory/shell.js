@@ -5,9 +5,6 @@ const {
 	getCustomCommand,
 	existDeniedCommands
 } = require('../utils/executeShell')
-const {
-	config: { adminUsers }
-} = require('../config')
 
 class Shell extends OAuth {
 	constructor(args) {
@@ -41,8 +38,8 @@ class Shell extends OAuth {
 
 	// Override
 	validateOAuth(msg, match) {
-		if (!adminUsers.includes(this.chatId)) {
-			this.botServer.sendMessage(this.chatId, 'You are not allowed to use this bot')
+		if (!this.adminUsers.includes(this.userId)) {
+			this.botServer.sendMessage(this.chatId, 'You are not allowed to use this bot!')
 			this.log.warn({ ...msg , ...match }, 'Blocked by oauth policies')
 			return false
 		}

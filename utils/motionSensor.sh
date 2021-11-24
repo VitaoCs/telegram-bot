@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CHAT_ID=`jq '.ADMIN_CHAT_ID' ./../keys.json`
+CHAT_ID=`jq '.ALLOWED_CHAT_ID' ./../keys.json`
 TOKEN=`jq '.AUTH_TOKEN' ./../keys.json | tr -d '"'`
 CAM_IP=`jq '.ESP32_CAM_IP' ./../keys.json | tr -d '"'`
 

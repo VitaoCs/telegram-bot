@@ -1,9 +1,10 @@
 const { exec, spawn } = require('child_process')
+const { loadConfig } = require('../utils/loadConfigFile')
 const {
 	config: {
 		shell: { customCommands, deniedCommands },
 	},
-} = require('../config')
+} = loadConfig()
 
 const execute = (command, callback) => {
 	exec(command, (error, stdout, stderr) => { callback(error, stdout, stderr) })

@@ -44,7 +44,7 @@ This project has an integration with [NGROK](https://ngrok.com/) to serve localh
 {
     "AUTH_TOKEN": "<your_telegram_auth_token>",
     "NGROK_TOKEN": "<your_ngrok_auth_token>T",
-    "ADMIN_CHAT_ID": 123,
+    "ALLOWED_CHAT_ID": 123,
     "ADMIN_USERS": [123],
     "ESP32_CAM_IP": "http://<your_local_ip_adress>"
 }

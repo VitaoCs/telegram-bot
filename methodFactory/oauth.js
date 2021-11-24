@@ -1,16 +1,23 @@
-const {
-	config: { adminUsers }
-} = require('../config')
-
 class OAuth {
-	constructor({ botServer, chatId, log}) {
+	constructor({ botServer, chatId, userId, botConfigs, log}) {
+		const {
+			keysPath,
+			config: {
+				adminUsers,
+				allowedChat
+			}
+		} = botConfigs
 		this.botServer = botServer
 		this.chatId = chatId
+		this.userId = userId
+		this.adminUsers = adminUsers
+		this.allowedChat = allowedChat
+		this.keysPath = keysPath
 		this.log = log
 	}
 
 	validateOAuth(msg, match) {
-		if (!adminUsers.includes(this.chatId)) {
+		if (!this.allowedChat.includes(this.chatId)) {
 			this.botServer.sendMessage(this.chatId, 'You are not allowed to use this bot!')
 			this.log.warn({ ...msg , ...match }, 'Blocked by oauth policies')
 			return false

@@ -9,8 +9,7 @@ class Help extends OAuth {
 	executeMethod() {
 		switch (this.command) {
 		case 'shell':
-			this.botServer.sendMessage(this.chatId, 'Use /shell <your_command> to execute a bash command on the server.')
-			this.botServer.sendMessage(this.chatId, 'There are allowed and blocked commands. Contact our admin users for more information.')
+			this.botServer.sendMessage(this.chatId, 'Use /shell <your_command> to execute a bash command on the server. There are allowed and blocked commands. Contact our admin users for more information.')
 			break
 		case 'iot':
 			this.botServer.sendMessage(this.chatId, 'Use /iot <iot_group> to execute the automated iot group command.')
@@ -18,12 +17,14 @@ class Help extends OAuth {
 		case 'tunnel':
 			this.botServer.sendMessage(this.chatId, 'Use /tunnel <on/off> to create a tunnel to access server hosted urls.')
 			break
+		case 'configure':
+			this.botServer.sendMessage(this.chatId, 'Use /configure add/delete <key> <value>, to change the config or /configure info')
+			break
 		case 'admin':
 			this.adminInfo()
 			break
 		default:
-			this.botServer.sendMessage(this.chatId, 'You can perform the following bot commands: shell, iot, tunnel, admin.')
-			this.botServer.sendMessage(this.chatId, 'Type /help <command>, for more information')
+			this.botServer.sendMessage(this.chatId, 'You can perform the following bot commands: shell, iot, tunnel, configure, admin. Type /help <command>, for more information')
 			break
 		}
 	}
@@ -51,9 +52,11 @@ class Help extends OAuth {
 			this.adminUsers.forEach((admin) => adminUsersMessage = `${adminUsersMessage} ${admin}`)
 			this.allowedChat.forEach((chat) => allowedChatsMessage = `${allowedChatsMessage} ${chat}`)
 
-			this.botServer.sendMessage(this.chatId, 'Here is what we have!')
-			this.botServer.sendMessage(this.chatId, adminUsersMessage)
-			this.botServer.sendMessage(this.chatId, allowedChatsMessage)
+			this.botServer.sendMessage(this.chatId, `
+				<b>Here is what we have!</b>
+				<code>${adminUsersMessage}</code>
+				<code>${allowedChatsMessage}</code>
+			`, { parse_mode: 'HTML' })
 		}
 	}
 }

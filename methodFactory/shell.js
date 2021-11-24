@@ -1,3 +1,10 @@
+const {
+	BOT_MESSAGES: {
+		OAUTH_BLOCK, 
+		SHELL_BLOCK,
+		SHELL_ERROR_EXECUTION
+	}
+} = require('../utils/constants')
 const OAuth = require('./oauth')
 const {
 	execute,
@@ -15,7 +22,7 @@ class Shell extends OAuth {
 
 	isValidShellCommand () {
 		if (existDeniedCommands(this.command)) {
-			this.botServer.sendMessage(this.chatId, 'You are not allowed to perform this command!')
+			this.botServer.sendMessage(this.chatId, SHELL_BLOCK)
 			return false
 		}
 		return true
@@ -31,7 +38,7 @@ class Shell extends OAuth {
 		}
 
 		execute(this.command, (error, stdout, stderr) => {
-			if(error) this.botServer.sendMessage(this.chatId, 'Failed to execute your command')
+			if(error) this.botServer.sendMessage(this.chatId, SHELL_ERROR_EXECUTION)
 			else this.botServer.sendMessage(this.chatId, `<code>${stdout}${stderr}</code>`, { parse_mode: 'HTML' })
 		})
 	}
@@ -39,7 +46,7 @@ class Shell extends OAuth {
 	// Override
 	validateOAuth(msg, match) {
 		if (!this.adminUsers.includes(this.userId)) {
-			this.botServer.sendMessage(this.chatId, 'You are not allowed to use this bot!')
+			this.botServer.sendMessage(this.chatId, OAUTH_BLOCK)
 			this.log.warn({ ...msg , ...match }, 'Blocked by oauth policies')
 			return false
 		}

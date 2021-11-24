@@ -1,3 +1,4 @@
+const { BOT_MESSAGES: { OAUTH_BLOCK } } = require('../utils/constants')
 class OAuth {
 	constructor({ botServer, chatId, userId, botConfigs, log}) {
 		const {
@@ -18,7 +19,7 @@ class OAuth {
 
 	validateOAuth(msg, match) {
 		if (!this.allowedChat.includes(this.chatId)) {
-			this.botServer.sendMessage(this.chatId, 'You are not allowed to use this bot!')
+			this.botServer.sendMessage(this.chatId, OAUTH_BLOCK)
 			this.log.warn({ ...msg , ...match }, 'Blocked by oauth policies')
 			return false
 		}

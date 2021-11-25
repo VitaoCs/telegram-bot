@@ -11,5 +11,7 @@ module.exports = {
 		names: ['Alessandra', 'Claudio', 'Victor', 'Henrique'],
 		initialValuePerUser: 750,
 		dailyExpectedCosts: 50
-	}
+	},
+	HTML_GREATER: '&gt;',
+	HTML_SMALLER: '&lt;'
 }

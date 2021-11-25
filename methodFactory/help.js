@@ -1,32 +1,35 @@
 const OAuth = require('./oauth')
+const configure = require('./configure')
+const shell = require('./shell')
+const iot = require('./iot')
+const tunnel = require('./tunnel')
+const bank = require('./bank')
+const { HTML_SMALLER, HTML_GREATER } = require('../utils/constants')
+const methods = { shell, iot, tunnel, configure, bank }
+
 class Help extends OAuth {
 	constructor(args) {
 		super(args)
 		const { command } = args
 		this.command = command
+		this.argsUsed = args
+	}
+
+	helpFactory (value) {
+		const Method = methods[value]
+		if (!Method) return false
+		return new Method(this.argsUsed)
 	}
 
 	executeMethod() {
-		switch (this.command) {
-		case 'shell':
-			this.botServer.sendMessage(this.chatId, 'Use /shell <your_command> to execute a bash command on the server. There are allowed and blocked commands. Contact our admin users for more information.')
-			break
-		case 'iot':
-			this.botServer.sendMessage(this.chatId, 'Use /iot <iot_group> to execute the automated iot group command.')
-			break
-		case 'tunnel':
-			this.botServer.sendMessage(this.chatId, 'Use /tunnel <on/off> to create a tunnel to access server hosted urls.')
-			break
-		case 'configure':
-			this.botServer.sendMessage(this.chatId, 'Use /configure add/delete <key> <value>, to change the config or /configure info')
-			break
-		case 'admin':
-			this.adminInfo()
-			break
-		default:
-			this.botServer.sendMessage(this.chatId, 'You can perform the following bot commands: shell, iot, tunnel, configure, admin. Type /help <command>, for more information')
-			break
-		}
+		const methodHelper = this.helpFactory(this.command)
+		if(this.command === 'admin') return this.adminInfo()
+		if(!methodHelper) return this.botServer.sendMessage(this.chatId, `
+			You can perform the following bot commands: shell, iot, tunnel, configure, bank, admin.\n
+			Use the following command for more information:
+			<code>/help ${HTML_SMALLER}command${HTML_GREATER}</code>
+		`, { parse_mode: 'HTML' })
+		methodHelper.help()
 	}
 
 	// Override

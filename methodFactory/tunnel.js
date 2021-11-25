@@ -1,5 +1,6 @@
 const ngrok = require('ngrok')
 const OAuth = require('./oauth')
+const { HTML_SMALLER, HTML_GREATER } = require('../utils/constants')
 
 class Tunnel extends OAuth {
 	constructor(args) {
@@ -25,6 +26,16 @@ class Tunnel extends OAuth {
 		} else {
 			this.botServer.sendMessage(this.chatId, `Command '${this.command}' not mapped...`)
 		}
+	}
+
+	help() {
+		this.botServer.sendMessage(this.chatId, `
+				<b>This command allow to create a tunnel on the server.</b>
+				\n Use the following command to open the tunnel:
+				<code>/tunnel ${HTML_SMALLER}on${HTML_GREATER}</code>
+				\n Use the following command to close the tunnel:
+				<code>/tunnel ${HTML_SMALLER}off${HTML_GREATER}</code>
+			`, { parse_mode: 'HTML' })
 	}
 }
 

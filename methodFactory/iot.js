@@ -1,6 +1,7 @@
 const fs = require('fs')
 const axios = require('axios')
 const OAuth = require('./oauth')
+const { HTML_SMALLER, HTML_GREATER } = require('../utils/constants')
 
 class Iot extends OAuth {
 	constructor(args) {
@@ -28,6 +29,14 @@ class Iot extends OAuth {
 		} else {
 			this.botServer.sendMessage(this.chatId, `Command '${this.command}' not mapped...`)
 		}
+	}
+
+	help() {
+		this.botServer.sendMessage(this.chatId, `
+				<b>This command is used to domotica applications.</b>
+				\n To execute the automated iot group command:
+				<code>/iot ${HTML_SMALLER}iot_group${HTML_GREATER}</code>
+			`, { parse_mode: 'HTML' })
 	}
 }
 

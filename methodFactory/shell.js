@@ -12,6 +12,7 @@ const {
 	getCustomCommand,
 	existDeniedCommands
 } = require('../utils/executeShell')
+const { HTML_SMALLER, HTML_GREATER } = require('../utils/constants')
 
 class Shell extends OAuth {
 	constructor(args) {
@@ -41,6 +42,15 @@ class Shell extends OAuth {
 			if(error) this.botServer.sendMessage(this.chatId, SHELL_ERROR_EXECUTION)
 			else this.botServer.sendMessage(this.chatId, `<code>${stdout}${stderr}</code>`, { parse_mode: 'HTML' })
 		})
+	}
+
+	help() {
+		this.botServer.sendMessage(this.chatId, `
+				<b>This command is restrict to admin users, you can run simple shell commands on the server.</b>
+				\n There are allowed and blocked commands. Contact our admin users for more information.
+				\n Use the following command:
+				<code>/shell ${HTML_SMALLER}your_command${HTML_GREATER}</code>
+			`, { parse_mode: 'HTML' })
 	}
 
 	// Override

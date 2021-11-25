@@ -6,7 +6,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const OAuth = require('./oauth')
-const { BANK_INITIAL_CONFIG: { names , initialValuePerUser, dailyExpectedCosts }} = require('../utils/constants')
+const { HTML_SMALLER, HTML_GREATER, BANK_INITIAL_CONFIG: { names , initialValuePerUser, dailyExpectedCosts }} = require('../utils/constants')
 const { loadConfig } = require('../utils/loadConfigFile')
 const { bankStatePath } = loadConfig()
 const STATE_PATH = `${process.env.PWD}/${bankStatePath}`
@@ -71,6 +71,22 @@ class Bank extends OAuth {
 		return user
 	}
 
+	addToDailyValues(user, value) {
+		const {
+			totalOnAccount,
+			totalSpent,
+			totalDaySpent,
+			availableDaySpent
+		} = user
+
+		user.totalOnAccount = totalOnAccount + value
+		user.totalSpent = totalSpent - value
+		user.totalDaySpent = value > totalDaySpent ? 0 : totalDaySpent - value
+		user.availableDaySpent = availableDaySpent + value
+
+		return user
+	}
+
 	endDay(user) {
 		const { availableDaySpent } = user
 
@@ -93,14 +109,22 @@ class Bank extends OAuth {
 			value
 		] = this.command.split(' ')
 		const numberOfSpaces = 3
-		const index = operation.length + name.length + value.length + numberOfSpaces
+		const index = value ? operation.length + name.length + value.length + numberOfSpaces : 1
 
 		return {
 			operation,
 			name,
-			value,
+			value: value || 0,
 			description: this.command.substr(index)
 		}
+	}
+
+	validateAdminOAuth() {
+		if (!this.adminUsers.includes(this.userId)) {
+			this.botServer.sendMessage(this.chatId, 'Not allowed to use this method. Contact admin user')
+			return false
+		}
+		return true
 	}
 
 	executeMethod() {
@@ -115,6 +139,16 @@ class Bank extends OAuth {
 		if(!names.includes(name)) return this.botServer.sendMessage(this.chatId, `No name ${name} configured for this bank.`)
 		if(operation !== 'add' && operation !== 'remove') return this.botServer.sendMessage(this.chatId, `No operation ${operation} configured for this bank.`)
 		this[operation](currentState, name, Number(value), description)
+	}
+
+	help() {
+		this.botServer.sendMessage(this.chatId, `
+				<b>This is the bank manager for a trip, you can use the following commands:</b>
+				\n To add a user expense for the day:
+				<code>/bank add ${HTML_SMALLER}name${HTML_GREATER} ${HTML_SMALLER}value${HTML_GREATER} ${HTML_SMALLER}description${HTML_GREATER}</code>
+				\n To remove the last entry for the user (need admin permission):
+				<code>/bank remove ${HTML_SMALLER}name${HTML_GREATER}</code>
+			`, { parse_mode: 'HTML' })
 	}
 
 	add(currentState, name, value, description) {
@@ -156,8 +190,8 @@ class Bank extends OAuth {
 		user.dayEntries = lastEntry
 		user.entries = userEntries
 		currentState[name] = user
-
 		this.writeCurrentState(currentState)
+
 		this.botServer.sendMessage(this.chatId, `
 				<b>${name} bank:</b>
 				<code>Daily money availible: ${user.availableDaySpent}</code>
@@ -166,8 +200,36 @@ class Bank extends OAuth {
 			`, { parse_mode: 'HTML' })
 	}
 
-	remove() {
-		return this.botServer.sendMessage(this.chatId, 'Removed')
+	remove(currentState, name) {
+		if(!this.validateAdminOAuth()) return
+		let user = currentState[name]
+		const userEntries = user.entries
+		let lastEntryDate = user.dayEntries
+		lastEntryDate = lastEntryDate[lastEntryDate.length-1]
+		
+		const dayEntries = userEntries[lastEntryDate]
+		const lastEntry = dayEntries.pop()
+
+		// If there is no more entries for this day and the admin wants to continue removing it
+		// just remove the last dayEntry registry
+		if(!lastEntry) {
+			lastEntryDate = user.dayEntries.pop()
+			currentState[name] = user
+			this.writeCurrentState(currentState)
+			return this.botServer.sendMessage(this.chatId, `Removed ${lastEntryDate} day entry from this bank.`)
+		}
+
+		userEntries[lastEntryDate] = dayEntries
+		user.entries = userEntries
+		currentState[name] = this.addToDailyValues(user, lastEntry.value)
+		this.writeCurrentState(currentState)
+
+		this.botServer.sendMessage(this.chatId, `
+				<b>Removed last entry from ${name} bank:</b>
+				<code>Value: ${lastEntry.value}</code>
+				<code>Hour: ${lastEntry.hour}</code>
+				<code>Description: ${lastEntry.description}</code>
+			`, { parse_mode: 'HTML' })
 	}
 }
 

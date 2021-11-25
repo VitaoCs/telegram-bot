@@ -1,5 +1,6 @@
 const fs = require('fs')
 const OAuth = require('./oauth')
+const { HTML_SMALLER, HTML_GREATER } = require('../utils/constants')
 
 class Configure extends OAuth {
 	constructor(args) {
@@ -29,6 +30,18 @@ class Configure extends OAuth {
 			message: msg.text
 		}, 'Message received')
 		return this
+	}
+
+	help() {
+		this.botServer.sendMessage(this.chatId, `
+				<b>This command is restrict to admin users, you can change the bot config using the following commands.</b>
+				\n To add/remove a key value from bot config, use:
+				<code>/configure add ${HTML_SMALLER}key${HTML_GREATER} ${HTML_SMALLER}value${HTML_GREATER}</code>
+				<code>/configure remove ${HTML_SMALLER}key${HTML_GREATER} ${HTML_SMALLER}value${HTML_GREATER}</code>
+				\n Keys can be: chat or admin.
+				\n To retrieve bot config information, use:
+				<code>/configure info</code>
+			`, { parse_mode: 'HTML' })
 	}
 
 	addConfig() {

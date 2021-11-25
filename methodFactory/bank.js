@@ -86,15 +86,31 @@ class Bank extends OAuth {
 		fs.writeFileSync(STATE_PATH, data)
 	}
 
-	// /bank Claudio 12
+	treatBankCommand() {
+		const [
+			operation,
+			name,
+			value
+		] = this.command.split(' ')
+		const numberOfSpaces = 3
+		const index = operation.length + name.length + value.length + numberOfSpaces
+
+		return {
+			operation,
+			name,
+			value,
+			description: this.command.substr(index)
+		}
+	}
+
 	executeMethod() {
 		const currentState = this.getCurrentState()
-		const [
+		const {
 			operation,
 			name,
 			value,
 			description
-		] = this.command.split(' ')
+		} = this.treatBankCommand()
 
 		if(!names.includes(name)) return this.botServer.sendMessage(this.chatId, `No name ${name} configured for this bank.`)
 		if(operation !== 'add' && operation !== 'remove') return this.botServer.sendMessage(this.chatId, `No operation ${operation} configured for this bank.`)
@@ -118,24 +134,12 @@ class Bank extends OAuth {
 				hour,
 				description
 			})
-			user = this.subtractDailyValues(user, value)
-			user.dayEntries = lastEntry
-			user.entries = userEntries
-			currentState[name] = user
-
-			this.writeCurrentState(currentState)
 		} else if(isSameDayEntry) {
 			userEntries[date].push({
 				value,
 				hour,
 				description
 			})
-			user = this.subtractDailyValues(user, value)
-			user.dayEntries = lastEntry
-			user.entries = userEntries
-			currentState[name] = user
-
-			this.writeCurrentState(currentState)
 		} else {
 			lastEntry.push(date)
 			user = this.endDay(user)
@@ -146,14 +150,20 @@ class Bank extends OAuth {
 				hour,
 				description
 			})
-			user = this.subtractDailyValues(user, value)
-			user.dayEntries = lastEntry
-			user.entries = userEntries
-			currentState[name] = user
-
-			this.writeCurrentState(currentState)
 		}
-		
+
+		user = this.subtractDailyValues(user, value)
+		user.dayEntries = lastEntry
+		user.entries = userEntries
+		currentState[name] = user
+
+		this.writeCurrentState(currentState)
+		this.botServer.sendMessage(this.chatId, `
+				<b>${name} bank:</b>
+				<code>Daily money availible: ${user.availableDaySpent}</code>
+				<code>Daily total spent: ${user.totalDaySpent}</code>
+				<code>On account: ${user.totalOnAccount}</code>
+			`, { parse_mode: 'HTML' })
 	}
 
 	remove() {

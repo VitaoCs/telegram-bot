@@ -136,8 +136,8 @@ class Bank extends OAuth {
 			description
 		} = this.treatBankCommand()
 
-		if(!names.includes(name)) return this.botServer.sendMessage(this.chatId, `No name ${name} configured for this bank.`)
-		if(operation !== 'add' && operation !== 'remove') return this.botServer.sendMessage(this.chatId, `No operation ${operation} configured for this bank.`)
+		if(operation !== 'info' && !names.includes(name)) return this.botServer.sendMessage(this.chatId, `No name ${name} configured for this bank.`)
+		if(operation !== 'add' && operation !== 'remove' && operation !== 'info') return this.botServer.sendMessage(this.chatId, `No operation ${operation} configured for this bank.`)
 		this[operation](currentState, name, Number(value), description)
 	}
 
@@ -149,6 +149,21 @@ class Bank extends OAuth {
 				\n To remove the last entry for the user (need admin permission):
 				<code>/bank remove ${HTML_SMALLER}name${HTML_GREATER}</code>
 			`, { parse_mode: 'HTML' })
+	}
+
+	printUserBankBaseInfo(name, { totalOnAccount, totalDaySpent, availableDaySpent }) {
+		return `
+			<b>${name} bank:</b>
+			<code>Available to spent today: ${availableDaySpent}</code>
+			<code>Already spent today: ${totalDaySpent}</code>
+			<code>Total on account: ${totalOnAccount}</code>
+		`
+	}
+	
+	printUserBankEntryInfo({ value, hour, description }) {
+		return `
+			<code>€${value} at ${hour}, ${description}</code>
+		`
 	}
 
 	add(currentState, name, value, description) {
@@ -230,6 +245,20 @@ class Bank extends OAuth {
 				<code>Hour: ${lastEntry.hour}</code>
 				<code>Description: ${lastEntry.description}</code>
 			`, { parse_mode: 'HTML' })
+	}
+
+	info(currentState, name) {
+		let infoMessage = 'Here is what we have!\n'
+		if(name) {
+			infoMessage = infoMessage + this.printUserBankBaseInfo(name, currentState[name])
+			infoMessage = infoMessage + '\nUser entries:\n'
+			const lastDayWithEntries = currentState[name].dayEntries.pop()
+			currentState[name].entries[lastDayWithEntries].forEach(entry => {
+				infoMessage = infoMessage + this.printUserBankEntryInfo(entry)
+			})
+		}
+		else Object.entries(currentState).forEach(user => infoMessage = infoMessage + this.printUserBankBaseInfo(user[0], user[1]))
+		this.botServer.sendMessage(this.chatId, infoMessage, { parse_mode: 'HTML' })
 	}
 }
 

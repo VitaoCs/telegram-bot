@@ -148,6 +148,10 @@ class Bank extends OAuth {
 				<code>/bank add ${HTML_SMALLER}name${HTML_GREATER} ${HTML_SMALLER}value${HTML_GREATER} ${HTML_SMALLER}description${HTML_GREATER}</code>
 				\n To remove the last entry for the user (need admin permission):
 				<code>/bank remove ${HTML_SMALLER}name${HTML_GREATER}</code>
+				\n To retrieve bank info, you can use:
+				<code>/bank info</code>
+				\n Or for more detailed info:
+				<code>/bank info ${HTML_SMALLER}name${HTML_GREATER}</code>
 			`, { parse_mode: 'HTML' })
 	}
 

@@ -15,6 +15,7 @@ const loadConfig = () => {
 	return {
 		logPath: './logs/',
 		keysPath: 'repos/x/keys.json',
+		bankStatePath: 'utils/bank/currentState.json',
 		authorizationToken : AUTH_TOKEN,
 		ngrokToken: NGROK_TOKEN,
 		config : {

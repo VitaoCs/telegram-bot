@@ -38,6 +38,7 @@ botServer.onText(/\s(.*)/, async (msg, match) => {
 		if(!builtMethod) return
 		await builtMethod.executeMethod()
 	} catch (error) {
-		log.error({...error}, 'Error received from factory execution')
+		const errorMessage = error.message || error
+		log.error({ errorMessage }, 'Error received from factory execution')
 	}
 })

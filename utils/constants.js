@@ -7,11 +7,6 @@ module.exports = {
 	INVALID_COMMAND_TYPE: {
 		message: '[Factory] Command not mapped'
 	},
-	BANK_INITIAL_CONFIG: {
-		names: ['Alessandra', 'Claudio', 'Victor', 'Henrique'],
-		initialValuePerUser: 750,
-		dailyExpectedCosts: 50
-	},
 	HTML_GREATER: '&gt;',
 	HTML_SMALLER: '&lt;'
 }

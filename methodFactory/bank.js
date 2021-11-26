@@ -6,9 +6,18 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const OAuth = require('./oauth')
-const { HTML_SMALLER, HTML_GREATER, BANK_INITIAL_CONFIG: { names , initialValuePerUser, dailyExpectedCosts }} = require('../utils/constants')
+const { HTML_SMALLER, HTML_GREATER } = require('../utils/constants')
 const { loadConfig } = require('../utils/loadConfigFile')
-const { bankStatePath } = loadConfig()
+const {
+	config: {
+		bank: {
+			bankStatePath,
+			names,
+			initialValuePerUser,
+			dailyExpectedCosts
+		}
+	}
+} = loadConfig()
 const STATE_PATH = `${process.env.PWD}/${bankStatePath}`
 
 // The method purpose is to track trip costs among friends/family
@@ -110,11 +119,14 @@ class Bank extends OAuth {
 		] = this.command.split(' ')
 		const numberOfSpaces = 3
 		const index = value ? operation.length + name.length + value.length + numberOfSpaces : 1
+		let valueTreated
+		if(value && isNaN(Number(value)))  valueTreated = value
+		else if (value) valueTreated = Number(value)
 
 		return {
 			operation,
 			name,
-			value: value || 0,
+			value: valueTreated || 0,
 			description: this.command.substr(index)
 		}
 	}
@@ -136,9 +148,10 @@ class Bank extends OAuth {
 			description
 		} = this.treatBankCommand()
 
-		if(operation !== 'info' && !names.includes(name)) return this.botServer.sendMessage(this.chatId, `No name ${name} configured for this bank.`)
-		if(operation !== 'add' && operation !== 'remove' && operation !== 'info') return this.botServer.sendMessage(this.chatId, `No operation ${operation} configured for this bank.`)
-		this[operation](currentState, name, Number(value), description)
+		if(operation !== 'info' && operation !== 'reset' && !names.includes(name)) return this.botServer.sendMessage(this.chatId, `No name ${name} configured for this bank.`)
+		if(operation !== 'add' && operation !== 'remove' && operation !== 'info' && operation !== 'reset') return this.botServer.sendMessage(this.chatId, `No operation ${operation} configured for this bank.`)
+
+		else this[operation](currentState, name, value, description)
 	}
 
 	help() {
@@ -150,8 +163,10 @@ class Bank extends OAuth {
 				<code>/bank remove ${HTML_SMALLER}name${HTML_GREATER}</code>
 				\n To retrieve bank info, you can use:
 				<code>/bank info</code>
-				\n Or for more detailed info:
+				\n Or for more detailed info about the last day entries:
 				<code>/bank info ${HTML_SMALLER}name${HTML_GREATER}</code>
+				\n Or all user entries:
+				<code>/bank info ${HTML_SMALLER}name${HTML_GREATER} complete</code>
 			`, { parse_mode: 'HTML' })
 	}
 
@@ -251,18 +266,34 @@ class Bank extends OAuth {
 			`, { parse_mode: 'HTML' })
 	}
 
-	info(currentState, name) {
+	info(currentState, name, value) {
 		let infoMessage = 'Here is what we have!\n'
 		if(name) {
 			infoMessage = infoMessage + this.printUserBankBaseInfo(name, currentState[name])
 			infoMessage = infoMessage + '\nUser entries:\n'
-			const lastDayWithEntries = currentState[name].dayEntries.pop()
-			currentState[name].entries[lastDayWithEntries].forEach(entry => {
-				infoMessage = infoMessage + this.printUserBankEntryInfo(entry)
-			})
+			let lastDayWithEntries = currentState[name].dayEntries.pop()
+			if(value && value === 'complete') {
+				while (lastDayWithEntries !== undefined) {
+					infoMessage = infoMessage + `\n${lastDayWithEntries}:\n`
+					currentState[name].entries[lastDayWithEntries].forEach(entry => {
+						infoMessage = infoMessage + this.printUserBankEntryInfo(entry)
+					})
+					lastDayWithEntries = currentState[name].dayEntries.pop()
+				}
+			} else {
+				currentState[name].entries[lastDayWithEntries].forEach(entry => {
+					infoMessage = infoMessage + this.printUserBankEntryInfo(entry)
+				})
+			}
 		}
 		else Object.entries(currentState).forEach(user => infoMessage = infoMessage + this.printUserBankBaseInfo(user[0], user[1]))
 		this.botServer.sendMessage(this.chatId, infoMessage, { parse_mode: 'HTML' })
+	}
+
+	reset() {
+		if(!this.validateAdminOAuth()) return
+		this.setupInitialState()
+		this.botServer.sendMessage(this.chatId, '<b>Bank restarted from scratch!</b>', { parse_mode: 'HTML' })
 	}
 }
 

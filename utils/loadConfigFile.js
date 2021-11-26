@@ -9,13 +9,15 @@ const loadConfig = () => {
 		NGROK_TOKEN,
 		ADMIN_USERS,
 		ALLOWED_CHAT_ID,
-		ESP32_CAM_IP
+		ESP32_CAM_IP,
+		BANK_NAMES,
+		BANK_INITIAL_VALUE_PER_USER,
+		DAILY_EXPECTED_COSTS
 	} = requireConfigFile('../../keys.json')
 
 	return {
 		logPath: './logs/',
 		keysPath: 'repos/x/keys.json',
-		bankStatePath: 'utils/bank/currentState.json',
 		authorizationToken : AUTH_TOKEN,
 		ngrokToken: NGROK_TOKEN,
 		config : {
@@ -35,6 +37,12 @@ const loadConfig = () => {
 					}
 				],
 				deniedCommands : ['rm', 'rmdir', 'shutdown', 'halt', 'sudo', 'mv', 'touch', 'chmod', 'wget', 'curl', 'echo']
+			},
+			bank: {
+				bankStatePath: 'utils/bank/currentState.json',
+				names: BANK_NAMES,
+				initialValuePerUser: BANK_INITIAL_VALUE_PER_USER,
+				dailyExpectedCosts: DAILY_EXPECTED_COSTS
 			}
 		}
 	}

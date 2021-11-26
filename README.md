@@ -11,7 +11,6 @@
 # Overview
 This projects contains a Telegram bot to serve as home server for basic automation and script executions. Was based on [@thiagosanches](https://github.com/thiagosanches) project on [GitHub](https://github.com/thiagosanches/arisco).
 
-
 # Installation and Execution
 
 Node 14 or greater
@@ -46,7 +45,10 @@ This project has an integration with [NGROK](https://ngrok.com/) to serve localh
     "NGROK_TOKEN": "<your_ngrok_auth_token>T",
     "ALLOWED_CHAT_ID": 123,
     "ADMIN_USERS": [123],
-    "ESP32_CAM_IP": "http://<your_local_ip_adress>"
+    "ESP32_CAM_IP": "http://<your_local_ip_adress>",
+    "BANK_NAMES": ["<names_used_by_bank>"],
+    "BANK_INITIAL_VALUE_PER_USER": 123,
+    "DAILY_EXPECTED_COSTS": 123
 }
 ```
 
